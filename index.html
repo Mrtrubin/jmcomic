@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style>
+        img {
+            width: 720px;
+            display: block;
+        }
+
+        #container {
+            width: 720px;
+            margin: 0 auto;
+        }
+
+        .active {
+            background-color: #080;
+            color: #fff;
+        }
+
+        #bottom-message {
+            text-align: center;
+            color: #ccc;
+            padding: 20px 0 60px;
+        }
+
+        #downloadBtn {
+            position: fixed;
+            left: auto;
+            bottom: 0;
+            width: 720px;
+            height: 40px;
+            cursor: not-allowed;
+        }
+
+        #downloadBtn.active {
+            cursor: pointer;
+        }
+
+        #downloadBtn.active:hover {
+            background-color: #000;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="gallery" data-album="{{albumId}}">{{imgs}}</div>
+        <div id="bottom-message">已经到底了哦</div>
+        <button id="downloadBtn">加载中</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        window.addEventListener('load', function () {
+            const downloadBtn = document.getElementById('downloadBtn');
+            const album = document.getElementById('gallery').getAttribute('data-album');
+            const images = document.querySelectorAll('#gallery img');
+            downloadBtn.innerText = '保存';
+            downloadBtn.classList.add('active');
+
+            downloadBtn.addEventListener('click', function () {
+                downloadBtn.setAttribute('disabled', 'disabled');
+                downloadBtn.classList.remove('active');
+                downloadBtn.innerText = `打包中`;
+                processImages(album);
+            });
+        });
+
+        async function processImages(album) {
+            const images = document.querySelectorAll('#gallery img');
+            const zip = new JSZip();
+            let count = 0;
+            for (const img of images) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                ctx.drawImage(img, 0, 0);
+
+                // 使用 canvas.toBlob 直接生成 Blob
+                await new Promise((resolve) => {
+                    canvas.toBlob((blob) => {
+                        downloadBtn.innerText = `打包中[${count + 1}/${images.length}]`;
+                        zip.file(`image${count + 1}.jpg`, blob);
+                        count++;
+                        resolve();
+                    }, 'image/jpeg');
+                });
+            }
+
+            // 生成 ZIP 文件
+            downloadBtn.innerText = '保存中';
+            const content = await zip.generateAsync({ type: "blob" });
+            saveAs(content, album + ".zip");
+
+            // 恢复按钮状态
+            downloadBtn.removeAttribute('disabled');
+            downloadBtn.classList.add('active');
+            downloadBtn.innerText = '保存';
+        }
+    </script>
+</body>
+
+</html>
