@@ -7,12 +7,16 @@
     <title>{{title}}</title>
     <style>
         img {
-            width: 720px;
+            width: 100%;
             display: block;
         }
 
         #container {
-            width: 720px;
+            box-sizing: border;
+            width: 95vw;
+            height: 95vh;
+            max-width: 720px;
+            background-color: #000;
             margin: 0 auto;
         }
 
@@ -23,16 +27,18 @@
 
         #bottom-message {
             text-align: center;
-            color: #ccc;
-            padding: 20px 0 60px;
+            color: #ddd;
+            background-color: #000;
+            padding: 2rem 0 6rem;
         }
 
         #downloadBtn {
             position: fixed;
-            left: auto;
+            margin: 0 auto;
             bottom: 0;
-            width: 720px;
-            height: 40px;
+            width: 95vw;
+            max-width: 720px;
+            height: 4rem;
             cursor: not-allowed;
         }
 
